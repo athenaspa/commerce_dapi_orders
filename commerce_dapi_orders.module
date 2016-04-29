@@ -223,7 +223,8 @@ function commerce_dapi_orders_arguments($commerce_order) {
           continue;
         }
       }
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
       watchdog('commerce_dapi_orders', 'Data recovery Error: %data', array('%data' => $response->data), WATCHDOG_ERROR);
       drupal_set_message(t('Data recovery Error. Please contact technical support.'), 'warning', TRUE);
       $response_data_search = array();
@@ -288,7 +289,8 @@ function commerce_dapi_orders_arguments($commerce_order) {
           }
         }
 
-      } catch (Exception $e) {
+      }
+      catch (Exception $e) {
         watchdog('commerce_dapi_orders', 'Data recovery Error: %data', array('%data' => $response->data), WATCHDOG_ERROR);
         drupal_set_message(t('Data recovery Error. Please contact technical support.'), 'warning', TRUE);
         $response_data_retrieve_client = array();
@@ -674,6 +676,9 @@ function commerce_dapi_orders_create_order($commerce_order, $subject_id) {
       );
       commerce_order_status_update($commerce_order, 'completed');
 
+  // Insert discount for order.
+  commerce_dapi_orders_create_discount($commerce_order, $number_order);
+
     } catch (Exception $e) {
       $number_order = NULL;
       watchdog(
@@ -784,11 +789,68 @@ function commerce_dapi_orders_create_subject($commerce_order) {
     ), WATCHDOG_ERROR);
     drupal_set_message(t('Error in request to create subject. Please contact technical support.'), 'warning', TRUE);
 
-  } else {
+  }
+  else {
     watchdog('commerce_dapi_orders', t('Insert subject %data'), array(
       '%data' => serialize($identity),
     ), WATCHDOG_INFO);
   }
 
   drupal_goto('admin/commerce/orders/' . $commerce_order->order_id . '/dapi');
+}
+
+/**
+ * This callback gets the order data from Drupal Commerce
+ * and build up the xml that will be sent to information of discount to ERP
+ * if present.
+ *
+ * @param $commerce_order
+ */
+function commerce_dapi_orders_create_discount($commerce_order, $diapason_order_id) {
+
+  $order_wrapper = entity_metadata_wrapper('commerce_order', $commerce_order);
+  $discount_value = 0;
+
+  // Search and calcolate (if found) a discounts order.
+  foreach ($order_wrapper->commerce_line_items as $delta => $line_item) {
+
+    // Type of line-item.
+    if ($line_item->type->value() == "commerce_discount") {
+
+      // Components
+      $data_component_price = $line_item->commerce_unit_price->value();
+      foreach ($data_component_price['data']['components'] as $component) {
+        if (isset($component['price']['data']['discount_name'])) {
+          $discount_value = $discount_value + abs($component['price']['amount']);
+        }
+      }
+    }
+  }
+
+  // If discount is present.
+  if ($discount_value > 0) {
+
+    // Format amount.
+    $discount_value = commerce_currency_amount_to_decimal($discount_value, $component['price']['currency_code']);
+    $discount_value = number_format($discount_value, 2, ',', '');
+
+    // Request.
+    $response = commerce_dapi_orders_insert_discount($discount_value, $diapason_order_id, $type = 'amount');
+
+    // Read response.
+    if ($response->code == 200) {
+      watchdog(
+        'commerce_dapi_orders',
+        t('Discount Order %number_order send and save into Diapason ERP.'),
+        array('$number_order' => $diapason_order_id),
+        WATCHDOG_INFO
+      );
+    }
+    else {
+      watchdog('commerce_dapi_orders', t('Error in request to create discount order %order_id'), array(
+        '%oder_id' => $diapason_order_id,
+      ), WATCHDOG_ERROR);
+    }
+  }
+
 }
