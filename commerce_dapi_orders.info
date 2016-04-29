@@ -1,5 +1,5 @@
 name = "DAPI Order Framework"
-description = "System to place orders in Diapason ERP via DAPI. Developed in Athena SPA"
+description = "Framework for sending orders into Diapason ERP via DAPI. Developed in Athena SPA"
 core = 7.x
 package = "Diapason ERP"
 
