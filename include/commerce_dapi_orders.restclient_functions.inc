@@ -130,3 +130,30 @@ function commerce_dapi_orders_insert_order($data = array()) {
 
   return $response;
 }
+
+/**
+ * Insert Discount into Diapason Order.
+ *
+ * @param $discount_value
+ *   Value of discount. (Use point for decimal, no comma).
+ * @param $diapason_order_id
+ *   Id order of ERP.
+ * @param string $type
+ *   Type of discount [amount,fixed].
+ * @return object
+ *   Response from ERP.
+ */
+function commerce_dapi_orders_insert_discount($discount_value, $diapason_order_id, $type = 'amount') {
+
+  $resource_path = "ordini/inserimento-sconto-ordine/$type/$discount_value/$diapason_order_id";
+
+  $variables = array(
+    'endpoint' => variable_get('commerce_dapi_orders_hostname', 'http://localhost/'),
+    'headers' => array(
+      "Content-Type" => "application/json",
+    ),
+  );
+  $response = restclient_get($resource_path, $variables);
+
+  return $response;
+}
