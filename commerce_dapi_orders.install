@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * @file commerce_dapi_orders.install
+ */
+
+/**
+ * Implements hook_install()
+ */
+function commerce_dapi_orders_install() {
+
+  // Create Role 'storemanager'.
+  $role = new stdClass();
+  $role->name = 'storemanager';
+  $role->weight = 1;
+  user_role_save($role);
+
+  // Assigned permission to new role.
+  $role = user_role_load_by_name($role->name);
+  user_role_grant_permissions($role->rid, array('interact with diapason erp'));
+}
+
+/**
+ * Implements hook_uninstall()
+ */
+function commerce_dapi_orders_uninstall() {
+
+  // remove any roles we created
+  user_role_delete('storemanager');
+}
