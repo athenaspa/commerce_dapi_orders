@@ -223,17 +223,18 @@ function commerce_dapi_orders_arguments($commerce_order) {
           continue;
         }
       }
-    } catch (Exception $e) {
-      watchdog('commerce_dapi_orders', 'Data recovery Error: %data', array('%data' => $response->data), WATCHDOG_ERROR);
+    }
+    catch (Exception $e) {
+      watchdog('commerce_dapi_orders', 'Data recovery Error: @data', array('@data' => $response->data), WATCHDOG_ERROR);
       drupal_set_message(t('Data recovery Error. Please contact technical support.'), 'warning', TRUE);
       $response_data_search = array();
     }
   }
   else {
     // Log message error.
-    watchdog('commerce_dapi_orders', t('Error in request to get search subject: %firmName - $email'), array(
-      '%firmName' => $firmName,
-      '%email' => $commerce_order->mail,
+    watchdog('commerce_dapi_orders', t('Error in request to get search subject: @firmName - @email'), array(
+      '@firmName' => $firmName,
+      '@email' => $commerce_order->mail,
     ), WATCHDOG_ERROR);
     drupal_set_message(t('Error in request to get search subject. Please contact technical support.'), 'warning', TRUE);
     $response_data_search = array();
@@ -288,21 +289,22 @@ function commerce_dapi_orders_arguments($commerce_order) {
           }
         }
 
-      } catch (Exception $e) {
-        watchdog('commerce_dapi_orders', 'Data recovery Error: %data', array('%data' => $response->data), WATCHDOG_ERROR);
+      }
+      catch (Exception $e) {
+        watchdog('commerce_dapi_orders', 'Data recovery Error: @data', array('@data' => $response->data), WATCHDOG_ERROR);
         drupal_set_message(t('Data recovery Error. Please contact technical support.'), 'warning', TRUE);
         $response_data_retrieve_client = array();
       }
     }
     else {
       // Log message error.
-      watchdog('commerce_dapi_orders', t('Error in request to get retrieve subject %subjectID'), array(
-        '%subjectID' => $subject['subjectID'],
+      watchdog('commerce_dapi_orders', t('Error in request to get retrieve subject @subjectID'), array(
+        '@subjectID' => $subject['subjectID'],
       ), WATCHDOG_ERROR);
       drupal_set_message(
-        t('Error in request to get retrieve subject %subjectID. Please contact technical support.',
+        t('Error in request to get retrieve subject @subjectID. Please contact technical support.',
           array(
-            '%subjectID' => $subject['subjectID'],
+            '@subjectID' => $subject['subjectID'],
           )
         ), 'warning', TRUE);
       $response_data_retrieve_client = array();
@@ -424,20 +426,20 @@ function commerce_dapi_orders_create_order($commerce_order, $subject_id) {
         }
       }
     } catch (Exception $e) {
-      watchdog('commerce_dapi_orders', 'Data recovery Address Error: %data', array('%data' => $response->data), WATCHDOG_ERROR);
+      watchdog('commerce_dapi_orders', 'Data recovery Address Error: @data', array('@data' => $response->data), WATCHDOG_ERROR);
       drupal_set_message(t('Data recovery Address Error. Please contact technical support.'), 'warning', TRUE);
       drupal_goto('admin/commerce/orders/' . $commerce_order->order_id . '/dapi');
     }
   }
   else {
     // Log message error.
-    watchdog('commerce_dapi_orders', t('Error in request to get retrieve address for subject %subjectID'), array(
-      '%subjectID' => $subject_id,
+    watchdog('commerce_dapi_orders', t('Error in request to get retrieve address for subject @subjectID'), array(
+      '@subjectID' => $subject_id,
     ), WATCHDOG_ERROR);
     drupal_set_message(
-      t('Error in request to get retrieve address for subject %subjectID. Please contact technical support.',
+      t('Error in request to get retrieve address for subject @subjectID. Please contact technical support.',
         array(
-          '%subjectID' => $subject_id,
+          '@subjectID' => $subject_id,
         )
       ), 'warning', TRUE);
     drupal_goto('admin/commerce/orders/' . $commerce_order->order_id . '/dapi');
@@ -662,30 +664,33 @@ function commerce_dapi_orders_create_order($commerce_order, $subject_id) {
       // Log and save order.
       watchdog(
         'commerce_dapi_orders',
-        t('Order %number_order send and save into Diapason ERP.'),
-        array('$number_order' => $number_order),
+        t('Order @number_order send and save into Diapason ERP.'),
+        array('@number_order' => $number_order),
         WATCHDOG_INFO
       );
       drupal_set_message(
         t(
-          'Order %number_order send and save into Diapason ERP.',
-          array('%number_order' => $number_order)
+          'Order @number_order send and save into Diapason ERP.',
+          array('@number_order' => $number_order)
         )
       );
       commerce_order_status_update($commerce_order, 'completed');
+
+  // Insert discount for order.
+  commerce_dapi_orders_create_discount($commerce_order, $number_order);
 
     } catch (Exception $e) {
       $number_order = NULL;
       watchdog(
         'commerce_dapi_orders',
-        t('Error in request to retrieve number order from order %order_id send.'),
-        array('%order_id' => $commerce_order->order_id),
+        t('Error in request to retrieve number order from order @order_id send.'),
+        array('@order_id' => $commerce_order->order_id),
         WATCHDOG_ERROR
       );
       drupal_set_message(
-        t('Error in request to retrieve number order from order %order_id send. Please contact technical support.',
+        t('Error in request to retrieve number order from order @order_id send. Please contact technical support.',
           array(
-            '%order_id' => $commerce_order->order_id,
+            '@order_id' => $commerce_order->order_id,
           )
         ), 'warning', TRUE);
     }
@@ -693,15 +698,15 @@ function commerce_dapi_orders_create_order($commerce_order, $subject_id) {
   }
   else {
     // Log message error.
-    watchdog('commerce_dapi_orders', t('Error in request to create order %order_id for subject %subjectID'), array(
-      '%subjectID' => $subject_id,
-      '%oder_id' => $commerce_order->order_id,
+    watchdog('commerce_dapi_orders', t('Error in request to create order @order_id for subject @subjectID'), array(
+      '@subjectID' => $subject_id,
+      '@oder_id' => $commerce_order->order_id,
     ), WATCHDOG_ERROR);
     drupal_set_message(
-      t('Error in request to create order %order_id for subject %subjectID. Please contact technical support.',
+      t('Error in request to create order @order_id for subject @subjectID. Please contact technical support.',
         array(
-          '%subjectID' => $subject_id,
-          '%order_id' => $commerce_order->order_id,
+          '@subjectID' => $subject_id,
+          '@order_id' => $commerce_order->order_id,
         )
       ), 'warning', TRUE);
   }
@@ -778,17 +783,74 @@ function commerce_dapi_orders_create_subject($commerce_order) {
   if ($response->code != '200') {
 
     // Log message error.
-    watchdog('commerce_dapi_orders', t('Error in request to create subject from order %order_id. Data: %data'), array(
-      '%order_id' => $commerce_order->order_id,
-      '%data' => $response->data,
+    watchdog('commerce_dapi_orders', t('Error in request to create subject from order @order_id. Data: @data'), array(
+      '@order_id' => $commerce_order->order_id,
+      '@data' => $response->data,
     ), WATCHDOG_ERROR);
     drupal_set_message(t('Error in request to create subject. Please contact technical support.'), 'warning', TRUE);
 
-  } else {
-    watchdog('commerce_dapi_orders', t('Insert subject %data'), array(
-      '%data' => serialize($identity),
+  }
+  else {
+    watchdog('commerce_dapi_orders', t('Insert subject @data'), array(
+      '@data' => serialize($identity),
     ), WATCHDOG_INFO);
   }
 
   drupal_goto('admin/commerce/orders/' . $commerce_order->order_id . '/dapi');
+}
+
+/**
+ * This callback gets the order data from Drupal Commerce
+ * and build up the xml that will be sent to information of discount to ERP
+ * if present.
+ *
+ * @param $commerce_order
+ */
+function commerce_dapi_orders_create_discount($commerce_order, $diapason_order_id) {
+
+  $order_wrapper = entity_metadata_wrapper('commerce_order', $commerce_order);
+  $discount_value = 0;
+
+  // Search and calcolate (if found) a discounts order.
+  foreach ($order_wrapper->commerce_line_items as $delta => $line_item) {
+
+    // Type of line-item.
+    if ($line_item->type->value() == "commerce_discount") {
+
+      // Components
+      $data_component_price = $line_item->commerce_unit_price->value();
+      foreach ($data_component_price['data']['components'] as $component) {
+        if (isset($component['price']['data']['discount_name'])) {
+          $discount_value = $discount_value + abs($component['price']['amount']);
+        }
+      }
+    }
+  }
+
+  // If discount is present.
+  if ($discount_value > 0) {
+
+    // Format amount.
+    $discount_value = commerce_currency_amount_to_decimal($discount_value, $component['price']['currency_code']);
+    $discount_value = number_format($discount_value, 2, ',', '');
+
+    // Request.
+    $response = commerce_dapi_orders_insert_discount($discount_value, $diapason_order_id, $type = 'amount');
+
+    // Read response.
+    if ($response->code == 200) {
+      watchdog(
+        'commerce_dapi_orders',
+        t('Discount Order @number_order send and save into Diapason ERP.'),
+        array('@number_order' => $diapason_order_id),
+        WATCHDOG_INFO
+      );
+    }
+    else {
+      watchdog('commerce_dapi_orders', t('Error in request to create discount order @order_id'), array(
+        '@oder_id' => $diapason_order_id,
+      ), WATCHDOG_ERROR);
+    }
+  }
+
 }
