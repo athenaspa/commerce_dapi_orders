@@ -752,6 +752,7 @@ function commerce_dapi_orders_create_subject($commerce_order) {
   $account['phone'] = $wrapper->commerce_customer_billing->commerce_customer_address->phone_number->value();
   $account['billing_header'] = ($wrapper->commerce_customer_billing->commerce_customer_address->organisation_name->value() == NULL) ? '' : $wrapper->commerce_customer_billing->commerce_customer_address->organisation_name->value();
   $account['vat_number'] = ($wrapper->commerce_customer_billing->field_vat_number->value() == NULL) ? '' : $wrapper->commerce_customer_billing->field_vat_number->value();
+  $account['vat_number'] = preg_replace('/^' . preg_quote('IT', '/') . '/', '', strtoupper($account['vat_number']));
 
   $identity->account = $account;
 
