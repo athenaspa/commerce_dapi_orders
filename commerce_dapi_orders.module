@@ -610,6 +610,7 @@ function commerce_dapi_orders_create_order($commerce_order, $subject_id) {
           $bundle_item_price = number_format($price, 2, ',', '');
           $bundle_item_product = $bundle_item->field_pbi_reference_product;
           $bundle_item_product_sku = $bundle_item_product->sku->value();
+          $bundle_item_qty = ($bundle_item->field_pbi_qty_product->value()=='') ? 1:$bundle_item->field_pbi_qty_product->value();
 
           // Build row xml "RIGHE-DORDINE-E-OFFERTA"
           if (isset($bundle_item_product_sku) && isset($bundle_item_price)) {
@@ -618,7 +619,7 @@ function commerce_dapi_orders_create_order($commerce_order, $subject_id) {
             $RIGHE_DORDINE_E_OFFERTA->addChild('ARTICOLO1', $bundle_item_product_sku);
             $RIGHE_DORDINE_E_OFFERTA->addChild('SPECIFICA1');
             $RIGHE_DORDINE_E_OFFERTA->addChild('UM1');
-            $RIGHE_DORDINE_E_OFFERTA->addChild('QTA-VENDUTA1', "F");
+            $RIGHE_DORDINE_E_OFFERTA->addChild('QTA-VENDUTA1', $bundle_item_qty);
             $RIGHE_DORDINE_E_OFFERTA->addChild('SCONTO11');
             $RIGHE_DORDINE_E_OFFERTA->addChild('SCONTO21');
             $RIGHE_DORDINE_E_OFFERTA->addChild('DATA-RIC1');
